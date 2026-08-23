@@ -97,12 +97,6 @@ With no `DATABASE_URL` the app uses SQLite (`./data/dev.db`) and seeds two ficti
 login. Point `DATABASE_URL` at Supabase (session pooler URI) to run against Postgres — migrations apply on
 startup.
 
-### Talking to the agent without a phone
-
-```bash
-uv run python scripts/chat.py --caller +14155550139   # terminal chat through the same LangChain loop
-```
-
 ### Connecting Vapi (needs a public HTTPS URL)
 
 ```bash
