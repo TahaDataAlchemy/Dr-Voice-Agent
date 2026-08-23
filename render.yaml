@@ -1,0 +1,42 @@
+# Render Blueprint: one free web service running the Docker image (FastAPI + Next.js static dashboard).
+# Database = Supabase Postgres (external), so no Render database is declared.
+# After "New -> Blueprint", Render prompts for the `sync: false` values below.
+services:
+  - type: web
+    name: patient-voice-agent
+    runtime: docker
+    plan: free
+    region: singapore        # same region as the Supabase project (ap-southeast-1)
+    healthCheckPath: /api/v1/healthcheck
+    autoDeploy: true
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: DATABASE_URL            # Supabase *session pooler* URI (postgresql://postgres.<ref>:<pw>@aws-0-<region>.pooler.supabase.com:5432/postgres)
+        sync: false
+      - key: SECRET_KEY              # JWT signing key for dashboard logins
+        generateValue: true
+      - key: VAPI_API_KEY            # Vapi private key (dashboard -> Org settings -> API keys)
+        sync: false
+      - key: VAPI_WEBHOOK_SECRET     # shared secret Vapi sends to our endpoints; generate any long random string
+        generateValue: true
+      - key: OPENROUTER_API_KEY      # LangChain -> OpenRouter (conversation + post-call analysis)
+        sync: false
+      - key: LLM_MODEL
+        value: openai/gpt-oss-120b
+      - key: VOICE_LLM_MODE          # vapi = Vapi runs the per-turn LLM and calls our tools; custom = LangChain loop on this server
+        value: vapi
+      - key: VAPI_SYNC_ON_STARTUP    # push assistant config (custom-LLM URL = RENDER_EXTERNAL_URL) on boot
+        value: "true"
+      - key: VAPI_AREA_CODE          # desired area code when the app creates the free Vapi number
+        value: "415"
+      - key: SEED_DEMO_DATA
+        value: "true"
+      - key: DEMO_USER_EMAIL
+        value: demo@example.com
+      - key: DEMO_USER_PASSWORD
+        sync: false
+      - key: CLINIC_NAME
+        value: Maple Health Clinic
+      - key: AGENT_NAME
+        value: Sam
