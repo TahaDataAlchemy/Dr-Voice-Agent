@@ -5,10 +5,10 @@ persists them to Postgres, and exposes them through a REST API and a small dashb
 
 | | |
 |---|---|
-| **Phone number** | `+1 (___) ___-____` ← filled in after deployment (see *Live demo*) |
-| **API base URL** | `https://patient-voice-agent.onrender.com` ← filled in after deployment |
-| **Dashboard** | `https://<api-base>/app` · demo login `demo@example.com` / `demo12345` |
-| **API docs** | `https://<api-base>/docs` (OpenAPI) |
+| **Phone number** | **+1 (843) 969-4283** |
+| **API base URL** | https://dr-voice-agent--tahamehboob281.replit.app |
+| **Dashboard** | https://dr-voice-agent--tahamehboob281.replit.app/app · demo login `demo@example.com` / `demo12345` |
+| **API docs** | https://dr-voice-agent--tahamehboob281.replit.app/docs (OpenAPI) |
 
 > Built for a take-home assessment. No real patient data is stored; seed data is fictional.
 
