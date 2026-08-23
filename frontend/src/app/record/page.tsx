@@ -32,16 +32,74 @@ function Record() {
     if (fromUrl) remember({ patientId: fromUrl }); // external system (localStorage) sync
   }, [fromUrl]);
 
-  if (!id) {
+  if (id) return <RecordView id={id} />;
+  // No saved patient selected — if a call is selected, show its (unsaved) partial data instead of an empty state.
+  if (selection.callId) return <PartialRecordView callId={selection.callId} />;
+  return (
+    <Card>
+      <Empty>
+        Pick a patient from the <Link href="/patients" className="text-accent-text hover:underline">Patients</Link> list to see their record.
+      </Empty>
+    </Card>
+  );
+}
+
+/** A caller whose registration never completed has no saved record — show what was captured, read-only. */
+function PartialRecordView({ callId }: { callId: string }) {
+  const call = useQuery({ queryKey: ["call", callId], queryFn: () => endpoints.call(callId) });
+  if (call.isLoading) return <Spinner />;
+  const c = call.data;
+  if (!c)
     return (
       <Card>
-        <Empty>
-          Pick a patient from the <Link href="/patients" className="text-accent-text hover:underline">Patients</Link> list to see their record.
-        </Empty>
+        <Empty>Nothing selected yet.</Empty>
       </Card>
     );
-  }
-  return <RecordView id={id} />;
+  // If this call actually saved/updated a patient, send them to the real record.
+  if (c.patient_id) return <RecordView id={c.patient_id} />;
+
+  const d = c.draft ?? {};
+  const name = [d.first_name, d.last_name].filter(Boolean).join(" ") || c.patient_name || "Unknown caller";
+  return (
+    <Card className="p-5">
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <Avatar name={name} size="lg" />
+          <div>
+            <div className="text-lg font-semibold">{name}</div>
+            <div className="text-xs text-muted">Registration not completed — nothing was saved to the database</div>
+          </div>
+        </div>
+        <Badge tone="amber">Partial</Badge>
+      </div>
+
+      <div className="mt-6 grid grid-cols-1 gap-x-10 gap-y-6 sm:grid-cols-2">
+        <Section title="Captured so far" rows={[
+          ["First name", d.first_name ?? "—"],
+          ["Last name", d.last_name ?? "—"],
+          ["Date of birth", d.date_of_birth ? formatDob(d.date_of_birth) : "—"],
+          ["Sex", d.sex ?? "—"],
+          ["Phone", d.phone_number ? formatPhone(d.phone_number) : "—"],
+        ]} />
+        <Section title="Address" rows={[
+          ["Street", d.address_line_1 ?? "—"],
+          ["City", d.city ?? "—"],
+          ["State", d.state ?? "—"],
+          ["ZIP", d.zip_code ?? "—"],
+        ]} />
+      </div>
+
+      <div className="mt-6">
+        <Link
+          href={`/transcript?id=${c.id}`}
+          onClick={() => remember({ callId: c.id })}
+          className="text-sm text-accent-text hover:underline"
+        >
+          View the call transcript →
+        </Link>
+      </div>
+    </Card>
+  );
 }
 
 function RecordView({ id }: { id: string }) {
