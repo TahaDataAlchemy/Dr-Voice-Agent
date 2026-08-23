@@ -67,8 +67,8 @@ def ask_call(call_id: uuid.UUID, payload: Annotated[AskRequest, Body()], session
     from modules.analysis.analysis_service import ask_about_call
 
     settings = get_settings()
-    if not settings.openrouter_api_key:
-        raise HTTPException(status.HTTP_503_SERVICE_UNAVAILABLE, "OPENROUTER_API_KEY is not configured")
+    if not settings.analysis_configured:
+        raise HTTPException(status.HTTP_503_SERVICE_UNAVAILABLE, "No analysis LLM configured (set GROQ_API_KEY or OPENROUTER_API_KEY)")
     call = CallService(session).get(call_id)
     try:
         answer = ask_about_call(call, payload.question, payload.history)
@@ -76,7 +76,7 @@ def ask_call(call_id: uuid.UUID, payload: Annotated[AskRequest, Body()], session
         LOG.exception(f"ask_call failed: {exc}")
         raise HTTPException(status.HTTP_502_BAD_GATEWAY, "The language model did not answer; try again") from exc
     LOG.info("call.ask", extra={"event": "call.ask", "call_id": call.vapi_call_id, "question": payload.question})
-    return envelope({"answer": answer, "model": settings.analysis_model or settings.llm_model})
+    return envelope({"answer": answer, "model": settings.analysis_llm[2]})
 
 
 @patient_calls_router.get("/{patient_id}/calls", summary="Calls linked to a patient")

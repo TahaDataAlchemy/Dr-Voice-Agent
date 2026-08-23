@@ -75,7 +75,11 @@ class Settings(BaseSettings):
         default="Cerebras,Groq",
         description="Comma-separated OpenRouter provider preference (fast providers first). Empty = OpenRouter default.",
     )
-    analysis_model: Optional[str] = Field(default=None, description="Post-call analysis model; defaults to LLM_MODEL.")
+    analysis_model: Optional[str] = Field(default=None, description="Post-call analysis / chat model; defaults to LLM_MODEL.")
+
+    # Analysis + "ask about this call" can run on Groq (fast, generous free tier) instead of OpenRouter.
+    groq_api_key: Optional[str] = None
+    groq_base_url: str = "https://api.groq.com/openai/v1"
 
     # --- Voice loop placement ------------------------------------------------------
     voice_llm_mode: str = Field(
@@ -113,6 +117,18 @@ class Settings(BaseSettings):
     def base_url(self) -> Optional[str]:
         url = self.public_base_url or self.render_external_url
         return url.rstrip("/") if url else None
+
+    @property
+    def analysis_llm(self) -> tuple[str, str, str]:
+        """(api_key, base_url, model) for the post-call analysis + chat. Prefers Groq when GROQ_API_KEY is set."""
+        model = self.analysis_model or self.llm_model
+        if self.groq_api_key:
+            return self.groq_api_key, self.groq_base_url, model
+        return self.openrouter_api_key or "missing-key", self.openrouter_base_url, model
+
+    @property
+    def analysis_configured(self) -> bool:
+        return bool(self.groq_api_key or self.openrouter_api_key)
 
     @property
     def vapi_side_model(self) -> str:

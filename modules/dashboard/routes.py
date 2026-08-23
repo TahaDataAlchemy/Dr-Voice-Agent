@@ -59,8 +59,9 @@ def status(session: SessionDep) -> JSONResponse:
             "database": {"connected": db_ok, "engine": "sqlite" if settings.is_sqlite else "postgres", "error": db_error},
             "webhook": {"last_at": STATE.last_webhook_at, "last_type": STATE.last_webhook_type},
             "llm": {
-                "model": settings.llm_model,
-                "configured": bool(settings.openrouter_api_key),
+                "model": settings.analysis_llm[2],
+                "provider": "groq" if settings.groq_api_key else ("openrouter" if settings.openrouter_api_key else None),
+                "configured": settings.analysis_configured,
                 "last_turn_at": STATE.last_llm_turn_at,
                 "last_latency_ms": STATE.last_llm_latency_ms,
             },

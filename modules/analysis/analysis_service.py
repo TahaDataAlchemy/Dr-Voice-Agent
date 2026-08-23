@@ -58,14 +58,14 @@ SYSTEM = (
 
 def build_analysis_llm() -> ChatOpenAI:
     settings = get_settings()
+    api_key, base_url, model = settings.analysis_llm
     return ChatOpenAI(
-        model=settings.analysis_model or settings.llm_model,
-        api_key=settings.openrouter_api_key or "missing-openrouter-key",
-        base_url=settings.openrouter_base_url,
+        model=model,
+        api_key=api_key,
+        base_url=base_url,
         temperature=0,
         timeout=60,
-        max_retries=1,
-        default_headers={"HTTP-Referer": settings.base_url or "http://localhost:8000", "X-Title": "Patient Voice Agent"},
+        max_retries=2,
     )
 
 
@@ -94,7 +94,7 @@ def analyze_transcript(messages: list[dict[str, Any]], llm: BaseChatModel | None
 def analyze_call(call_id: str | uuid.UUID, llm: BaseChatModel | None = None) -> dict[str, Any] | None:
     """Background job: analyze a finished call and persist the result. Never raises."""
     settings = get_settings()
-    if llm is None and not settings.openrouter_api_key:
+    if llm is None and not settings.analysis_configured:
         LOG.info("analysis.skipped_no_key", extra={"event": "analysis.skipped", "call_id": str(call_id)})
         return None
     try:
