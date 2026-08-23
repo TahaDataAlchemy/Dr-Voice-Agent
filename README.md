@@ -234,30 +234,6 @@ to English.
 Logging: JSON lines to stdout and `logs/` (structured logger) — every turn, tool call with arguments and
 result, the **final saved payload** (`call.completed`), and the end-of-call summary.
 
----
-
-## Known limitations / trade-offs
-
-* **Why the loop runs in Vapi.** A voice turn has about a second before it stops feeling like conversation;
-  Vapi meets it by pipelining STT → LLM streaming → TTS on co-located infrastructure and cancelling on
-  barge-in. Routing every turn through Render → OpenRouter adds serial hops, doubles the cost of tool
-  turns, and turns a Render cold start into a dead call — so our code lives on the tool path. The custom
-  LangChain loop is kept (`VOICE_LLM_MODE=custom`, tested) for full control when latency matters less.
-* **Vapi + OpenRouter tool calling** depends on the upstream provider honouring function calls for
-  `gpt-oss-120b`; if a call misbehaves, `VAPI_MODEL_PROVIDER=openai` + `VAPI_MODEL=gpt-4o` is a one-line
-  switch (billed from Vapi credit).
-* **Free tiers.** Render spins idle services down; Supabase pauses projects after 7 idle days; a free Vapi
-  number supports U.S. area codes only.
-* **Transcript fidelity.** The live transcript is rebuilt from the history Vapi sends each turn and replaced
-  by Vapi's final transcript at the end of the call; per-turn "extracted" chips come from tool calls, so a
-  turn where the model did not call `capture_fields` shows no chips.
-* **Names.** Spaces are accepted inside names (spec says letters/hyphens/apostrophes); accented letters are
-  accepted too.
-* **Phone uniqueness** is not enforced (shared family phones); duplicate detection is advisory.
-* **Appointment scheduling** is a deterministic mock (no real calendar). **Spanish** relies on the prompt and
-  Deepgram `nova-3`; set `transcriber.language` to `multi` in `assistant_config.py` for code-switching.
-* Signup is open by default (`ALLOW_SIGNUP=false` to disable).
-
 ## Next steps
 
 Streaming the live transcript to the dashboard over SSE instead of polling, SMS confirmation after
