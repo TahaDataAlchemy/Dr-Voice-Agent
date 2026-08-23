@@ -6,7 +6,7 @@ services:
     name: patient-voice-agent
     runtime: docker
     plan: free
-    region: singapore        # same region as the Supabase project (ap-southeast-1)
+    region: oregon           # Render free tier only exists in oregon (us-west) or frankfurt (eu-central); singapore has no free tier and forces a paid instance (card prompt)
     healthCheckPath: /api/v1/healthcheck
     autoDeploy: true
     envVars:
