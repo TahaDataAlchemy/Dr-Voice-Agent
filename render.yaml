@@ -20,12 +20,14 @@ services:
         sync: false
       - key: VAPI_WEBHOOK_SECRET     # shared secret Vapi sends to our endpoints; generate any long random string
         generateValue: true
-      - key: OPENROUTER_API_KEY      # LangChain -> OpenRouter (conversation + post-call analysis)
+      - key: GROQ_API_KEY            # analysis + "ask about this call" run on Groq gpt-oss-120b (fast, free tier)
         sync: false
-      - key: LLM_MODEL               # post-call analysis + "ask about this call" (free tier)
-        value: google/gemma-4-31b-it:free
       - key: ANALYSIS_MODEL
-        value: google/gemma-4-31b-it:free
+        value: openai/gpt-oss-120b
+      - key: OPENROUTER_API_KEY      # optional fallback for analysis if GROQ_API_KEY is unset
+        sync: false
+      - key: LLM_MODEL
+        value: openai/gpt-oss-120b
       - key: VOICE_LLM_MODE          # vapi = Vapi runs the per-turn LLM and calls our tools; custom = LangChain loop on this server
         value: vapi
       - key: VAPI_MODEL_PROVIDER     # the live call runs on Vapi's own GPT-4o (billed from Vapi credit, reliable)
@@ -34,9 +36,13 @@ services:
         value: gpt-4o
       - key: VAPI_SYNC_ON_STARTUP    # push assistant config (custom-LLM URL = RENDER_EXTERNAL_URL) on boot
         value: "true"
-      - key: VAPI_AREA_CODE          # desired area code when the app creates the free Vapi number
-        value: "415"
+      - key: VAPI_PHONE_NUMBER_ID     # reuse the already-provisioned free Vapi number instead of creating a new one
+        value: 132ef1d3-7fe3-436f-b2e9-80c03c589039
+      - key: VAPI_AREA_CODE          # fallback area code if a number must be created
+        value: "843"
       - key: SEED_DEMO_DATA
+        value: "true"
+      - key: SEED_DEMO_CALLS
         value: "true"
       - key: DEMO_USER_EMAIL
         value: demo@example.com
