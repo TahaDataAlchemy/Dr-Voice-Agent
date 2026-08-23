@@ -22,10 +22,16 @@ services:
         generateValue: true
       - key: OPENROUTER_API_KEY      # LangChain -> OpenRouter (conversation + post-call analysis)
         sync: false
-      - key: LLM_MODEL
-        value: openai/gpt-oss-120b
+      - key: LLM_MODEL               # post-call analysis + "ask about this call" (free tier)
+        value: google/gemma-4-31b-it:free
+      - key: ANALYSIS_MODEL
+        value: google/gemma-4-31b-it:free
       - key: VOICE_LLM_MODE          # vapi = Vapi runs the per-turn LLM and calls our tools; custom = LangChain loop on this server
         value: vapi
+      - key: VAPI_MODEL_PROVIDER     # the live call runs on Vapi's own GPT-4o (billed from Vapi credit, reliable)
+        value: openai
+      - key: VAPI_MODEL
+        value: gpt-4o
       - key: VAPI_SYNC_ON_STARTUP    # push assistant config (custom-LLM URL = RENDER_EXTERNAL_URL) on boot
         value: "true"
       - key: VAPI_AREA_CODE          # desired area code when the app creates the free Vapi number
