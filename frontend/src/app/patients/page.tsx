@@ -36,12 +36,12 @@ function PatientsList() {
   const calls = useQuery({ queryKey: ["calls"], queryFn: () => endpoints.calls(100), refetchInterval: 8000 });
   const [q, setQ] = useState("");
 
-  // Most recent call per patient, so selecting a patient also primes their transcript.
+  // Most recent call actually LINKED to each patient (registered/updated on it), so selecting a
+  // patient primes *their* transcript — not a call that merely matched their phone number.
   const latestCallByPatient = useMemo(() => {
     const map = new Map<string, string>();
     for (const c of calls.data ?? []) {
-      const pid = c.patient_id ?? c.matched_patient_id;
-      if (pid && !map.has(pid)) map.set(pid, c.id); // calls are newest-first
+      if (c.patient_id && !map.has(c.patient_id)) map.set(c.patient_id, c.id); // calls are newest-first
     }
     return map;
   }, [calls.data]);
@@ -147,7 +147,7 @@ function partialRow(c: CallSummary): Row {
     insurance: c.draft.insurance_provider ?? "—",
     badge: { label: "Partial", tone: "amber" },
     muted: false,
-    onOpen: () => remember({ callId: c.id }),
+    onOpen: () => remember({ callId: c.id, patientId: undefined }),
     search: `${name} ${phone} ${formatPhone(phone)} ${c.draft.date_of_birth ?? ""} ${formatDob(c.draft.date_of_birth)}`.toLowerCase(),
   };
 }

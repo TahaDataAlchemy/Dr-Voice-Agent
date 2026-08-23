@@ -98,7 +98,7 @@ function CallRow({ call }: { call: CallSummary }) {
   return (
     <Link
       href={`/transcript?id=${call.id}`}
-      onClick={() => remember({ callId: call.id })}
+      onClick={() => remember({ callId: call.id, patientId: call.patient_id ?? undefined })}
       className="flex items-center gap-3 px-5 py-3 hover:bg-gray-50"
     >
       <Avatar name={name} />

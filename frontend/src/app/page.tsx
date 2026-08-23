@@ -99,7 +99,7 @@ function RecentRow({ call }: { call: CallSummary }) {
   return (
     <Link
       href={href}
-      onClick={() => remember(call.patient_id ? { patientId: call.patient_id, callId: call.id } : { callId: call.id })}
+      onClick={() => remember(call.patient_id ? { patientId: call.patient_id, callId: call.id } : { callId: call.id, patientId: undefined })}
       className="flex items-center gap-3 px-5 py-3 hover:bg-gray-50"
     >
       <Avatar name={name} />
