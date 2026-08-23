@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useMemo } from "react";
 import { AskAboutCall } from "@/components/AskAboutCall";
+import { RecordingPlayer } from "@/components/RecordingPlayer";
 import { Shell } from "@/components/Shell";
 import { Avatar, Badge, Card, Empty, Spinner, outcomeBadge } from "@/components/ui";
 import { endpoints, type CallDetail, type CallSummary, type CaptureEvent } from "@/lib/api";
@@ -251,11 +252,7 @@ function Transcript({ id, backHref }: { id: string; backHref: string }) {
         {(analysis?.summary || c.summary) && (
           <p className="mt-3 rounded-lg bg-gray-50 px-3 py-2 text-sm text-gray-700">{analysis?.summary ?? c.summary}</p>
         )}
-        {c.recording_url && (
-          <div className="mt-3">
-            <audio controls src={c.recording_url} className="w-full" />
-          </div>
-        )}
+        <RecordingPlayer callId={c.id} hasRecording={Boolean(c.recording_url)} />
       </Card>
 
       <AskAboutCall key={c.id} callId={c.id} llmConfigured={Boolean(status.data?.llm.configured)} model={status.data?.llm.model} />

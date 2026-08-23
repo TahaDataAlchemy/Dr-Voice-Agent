@@ -1,11 +1,12 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Pencil, Play, Trash2 } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import { EditPatientModal } from "@/components/EditPatientModal";
+import { RecordingPlayer } from "@/components/RecordingPlayer";
 import { Shell } from "@/components/Shell";
 import { Avatar, Badge, Button, Card, Empty, Spinner } from "@/components/ui";
 import { endpoints, type Patient } from "@/lib/api";
@@ -48,7 +49,6 @@ function RecordView({ id }: { id: string }) {
   const patient = useQuery({ queryKey: ["patient", id], queryFn: () => endpoints.patient(id) });
   const calls = useQuery({ queryKey: ["patient-calls", id], queryFn: () => endpoints.patientCalls(id) });
   const [editing, setEditing] = useState(false);
-  const [player, setPlayer] = useState<string | null>(null);
   const remove = useMutation({
     mutationFn: () => endpoints.deletePatient(id),
     onSuccess: () => {
@@ -66,7 +66,7 @@ function RecordView({ id }: { id: string }) {
     );
   const p = patient.data;
   const deleted = p.status === "deleted";
-  const recording = calls.data?.find((c) => c.recording_url)?.recording_url ?? null;
+  const callWithRecording = calls.data?.find((c) => c.recording_url) ?? null;
   const latestCall = calls.data?.[0];
 
   return (
@@ -113,9 +113,6 @@ function RecordView({ id }: { id: string }) {
         <Button onClick={() => setEditing(true)} disabled={deleted}>
           <Pencil className="h-4 w-4" /> Edit
         </Button>
-        <Button onClick={() => setPlayer(recording)} disabled={!recording} title={recording ? "Play the call recording" : "No recording linked to this patient yet"}>
-          <Play className="h-4 w-4" /> Play call
-        </Button>
         <Button
           variant="danger"
           loading={remove.isPending}
@@ -137,11 +134,7 @@ function RecordView({ id }: { id: string }) {
         )}
       </div>
 
-      {player && (
-        <div className="mt-4">
-          <audio controls autoPlay src={player} className="w-full" />
-        </div>
-      )}
+      {callWithRecording && <RecordingPlayer callId={callWithRecording.id} hasRecording />}
 
       <div className="mt-5 text-xs text-muted">
         Created {formatUtc(p.created_at)} · updated {formatUtc(p.updated_at)}

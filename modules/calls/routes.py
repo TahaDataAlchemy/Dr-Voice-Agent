@@ -79,6 +79,37 @@ def ask_call(call_id: uuid.UUID, payload: Annotated[AskRequest, Body()], session
     return envelope({"answer": answer, "model": settings.analysis_llm[2]})
 
 
+@calls_router.get("/{call_id}/recording-url", summary="Short-lived signed URL for the call recording")
+def recording_url(call_id: uuid.UUID, session: SessionDep) -> JSONResponse:
+    """Vapi stores recordings in a private bucket. This resolves the authenticated
+    `GET /call/{id}/{type}-recording` endpoint (302 → signed URL) using our Vapi key, server-side,
+    so the browser can play it without ever seeing the key."""
+    import httpx
+
+    call = CallService(session).get(call_id)
+    if not call.recording_url:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "This call has no recording")
+    settings = get_settings()
+    if settings.vapi_api_key:
+        for kind in ("mono", "stereo"):
+            try:
+                r = httpx.get(
+                    f"{settings.vapi_api_base_url}/call/{call.vapi_call_id}/{kind}-recording",
+                    headers={"Authorization": f"Bearer {settings.vapi_api_key}"},
+                    follow_redirects=False,
+                    timeout=20,
+                )
+            except Exception as exc:  # pragma: no cover - network path
+                LOG.warning(f"recording fetch failed: {exc}")
+                break
+            if r.status_code in (301, 302, 307) and r.headers.get("location"):
+                return envelope({"url": r.headers["location"]})
+            if r.status_code == 200:
+                return envelope({"url": str(r.url)})
+    # Fallback: maybe the stored URL is already publicly playable (non-access-controlled orgs).
+    return envelope({"url": call.recording_url})
+
+
 @patient_calls_router.get("/{patient_id}/calls", summary="Calls linked to a patient")
 def patient_calls(patient_id: uuid.UUID, session: SessionDep) -> JSONResponse:
     calls = CallService(session).list(patient_id=patient_id, limit=50)
