@@ -24,17 +24,23 @@ patient_calls_router = APIRouter(prefix="/patients", tags=["Calls"], dependencie
 
 
 def _with_patient(session, call: Call, schema=CallSummary):
+    """Resolve the row's display name to the CALLER, not a matched duplicate.
+
+    The caller's name is whatever they said (the draft); we only use a linked patient's name when the
+    call actually registered/updated that patient (`patient_id`). `matched_patient_id` is just a
+    duplicate hint — using it as the row name makes a different caller look like the matched patient.
+    """
     data = schema.model_validate(call)
-    pid = call.patient_id or call.matched_patient_id
-    if pid:
-        patient = session.get(Patient, pid)
+    draft = call.draft or {}
+    draft_name = " ".join(p for p in (draft.get("first_name"), draft.get("last_name")) if p).strip()
+
+    if call.patient_id:
+        patient = session.get(Patient, call.patient_id)
         if patient:
             data.patient_name = f"{patient.first_name} {patient.last_name}"
             data.insurance_provider = patient.insurance_provider
     if not data.patient_name:
-        draft = call.draft or {}
-        name = " ".join(p for p in (draft.get("first_name"), draft.get("last_name")) if p)
-        data.patient_name = name or None
+        data.patient_name = draft_name or None
         data.insurance_provider = data.insurance_provider or draft.get("insurance_provider")
     return data
 
