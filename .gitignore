@@ -214,3 +214,7 @@ frontend/out/
 frontend/.next/
 frontend/node_modules/
 .python-version.bak
+
+# local-only design docs (kept on disk, not pushed)
+docs/PLAN.md
+docs/TECHNICAL.md
