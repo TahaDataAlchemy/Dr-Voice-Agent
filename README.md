@@ -46,7 +46,7 @@ persistence run through exactly the same service layer as the REST API. Call-lif
 transcript, end-of-call report with recording) arrive on the same webhook and drive the dashboard; the
 post-call analysis and the transcript Q&A run through LangChain after the fact, where latency is free.
 `VOICE_LLM_MODE=custom` flips the assistant to Vapi's custom-LLM mode and runs the conversation loop in our
-LangChain agent instead (see *Known limitations* for why that is not the default).
+LangChain agent instead; the default keeps the loop in Vapi to avoid per-turn latency.
 
 Full request flows, endpoint and screen reference: **[docs/TECHNICAL.md](docs/TECHNICAL.md)**.
 
