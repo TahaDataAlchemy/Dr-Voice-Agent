@@ -171,7 +171,7 @@ curl "$API/patients?last_name=Doe"
 
 ### Data model
 
-`patients` stores the spec's fields with database-level constraints: NOT NULL on required fields, length
+`patients` stores the spec's fields with database-level constraints. Only **first name, last name, phone and city** are required (NOT NULL); date of birth, sex, address, state, ZIP, email, insurance, emergency contact and language are optional. Length
 CHECKs, `sex` enum CHECK, 10-digit phone (Postgres regex CHECK `^[2-9]\d{2}[2-9]\d{6}$`), ZIP / ZIP+4
 regex, 2-letter state, DOB not in the future, indexes on `last_name`, `date_of_birth`, `phone_number`,
 `deleted_at`, UTC `created_at`/`updated_at` (trigger + ORM), `deleted_at` for soft delete. Phone is

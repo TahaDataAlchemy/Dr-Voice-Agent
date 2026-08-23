@@ -58,19 +58,19 @@ class Patient(SQLModel, table=True):
     # Required demographics
     first_name: str = Field(max_length=50, nullable=False)
     last_name: str = Field(max_length=50, nullable=False)
-    date_of_birth: date = Field(nullable=False)
-    sex: str = Field(max_length=20, nullable=False)
+    date_of_birth: date | None = Field(default=None, nullable=True)
+    sex: str | None = Field(default=None, max_length=20, nullable=True)
     phone_number: str = Field(max_length=10, nullable=False, description="10 digits, no formatting")
 
     # Optional contact
     email: str | None = Field(default=None, max_length=254)
 
     # Address
-    address_line_1: str = Field(max_length=200, nullable=False)
+    address_line_1: str | None = Field(default=None, max_length=200, nullable=True)
     address_line_2: str | None = Field(default=None, max_length=100)
     city: str = Field(max_length=100, nullable=False)
-    state: str = Field(max_length=2, nullable=False)
-    zip_code: str = Field(max_length=10, nullable=False)
+    state: str | None = Field(default=None, max_length=2, nullable=True)
+    zip_code: str | None = Field(default=None, max_length=10, nullable=True)
 
     # Optional extras (opt-in during the call)
     insurance_provider: str | None = Field(default=None, max_length=100)

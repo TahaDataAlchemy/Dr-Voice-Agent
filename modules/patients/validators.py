@@ -246,20 +246,22 @@ def normalize_language(value: object) -> str:
 
 
 # ------------------------------------------------------------------- convenience
+# Minimal set that must be present and valid for a patient to be saved.
 REQUIRED_FIELDS = (
     "first_name",
     "last_name",
+    "phone_number",
+    "city",
+)
+# Everything else is optional (collected only if the caller opts in). Still validated when provided.
+OPTIONAL_FIELDS = (
     "date_of_birth",
     "sex",
-    "phone_number",
+    "email",
     "address_line_1",
-    "city",
+    "address_line_2",
     "state",
     "zip_code",
-)
-OPTIONAL_FIELDS = (
-    "email",
-    "address_line_2",
     "insurance_provider",
     "insurance_member_id",
     "preferred_language",

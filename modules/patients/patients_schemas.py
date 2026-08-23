@@ -32,12 +32,12 @@ class _PatientFieldsMixin(BaseModel):
     @field_validator("date_of_birth", mode="before", check_fields=False)
     @classmethod
     def _dob(cls, value):
-        return v.parse_date_of_birth(value) if value is not None else value
+        return v.parse_date_of_birth(value) if value not in (None, "") else None
 
     @field_validator("sex", mode="before", check_fields=False)
     @classmethod
     def _sex(cls, value):
-        return v.normalize_sex(value) if value is not None else value
+        return v.normalize_sex(value) if value not in (None, "") else None
 
     @field_validator("phone_number", mode="before", check_fields=False)
     @classmethod
@@ -52,7 +52,7 @@ class _PatientFieldsMixin(BaseModel):
     @field_validator("address_line_1", mode="before", check_fields=False)
     @classmethod
     def _address1(cls, value):
-        return v.normalize_text(value, "street address", 200) if value is not None else value
+        return v.normalize_text(value, "street address", 200, required=False)
 
     @field_validator("address_line_2", mode="before", check_fields=False)
     @classmethod
@@ -67,12 +67,12 @@ class _PatientFieldsMixin(BaseModel):
     @field_validator("state", mode="before", check_fields=False)
     @classmethod
     def _state(cls, value):
-        return v.normalize_state(value) if value is not None else value
+        return v.normalize_state(value) if value not in (None, "") else None
 
     @field_validator("zip_code", mode="before", check_fields=False)
     @classmethod
     def _zip(cls, value):
-        return v.normalize_zip(value) if value is not None else value
+        return v.normalize_zip(value) if value not in (None, "") else None
 
     @field_validator("insurance_provider", mode="before", check_fields=False)
     @classmethod
@@ -107,15 +107,15 @@ class PatientCreate(_PatientFieldsMixin):
 
     first_name: str = Field(..., examples=["Jane"])
     last_name: str = Field(..., examples=["Doe"])
-    date_of_birth: date = Field(..., description="MM/DD/YYYY or YYYY-MM-DD", examples=["03/14/1987"])
-    sex: SexLiteral
+    date_of_birth: date | None = Field(default=None, description="MM/DD/YYYY or YYYY-MM-DD", examples=["03/14/1987"])
+    sex: SexLiteral | None = None
     phone_number: str = Field(..., description="10-digit U.S. number (formatting ignored)", examples=["2125550188"])
     email: str | None = Field(default=None, examples=["jane.d@mail.com"])
-    address_line_1: str = Field(..., examples=["44 Bleecker St"])
+    address_line_1: str | None = Field(default=None, examples=["44 Bleecker St"])
     address_line_2: str | None = Field(default=None, examples=["Apt 3B"])
     city: str = Field(..., examples=["New York"])
-    state: str = Field(..., description="2-letter abbreviation (full names accepted)", examples=["NY"])
-    zip_code: str = Field(..., examples=["10012"])
+    state: str | None = Field(default=None, description="2-letter abbreviation (full names accepted)", examples=["NY"])
+    zip_code: str | None = Field(default=None, examples=["10012"])
     insurance_provider: str | None = Field(default=None, examples=["Aetna"])
     insurance_member_id: str | None = Field(default=None, examples=["W8842710X"])
     preferred_language: str = Field(default="English")
@@ -166,15 +166,15 @@ class PatientRead(BaseModel):
     patient_id: uuid.UUID
     first_name: str
     last_name: str
-    date_of_birth: date
-    sex: str
+    date_of_birth: date | None
+    sex: str | None
     phone_number: str
     email: str | None
-    address_line_1: str
+    address_line_1: str | None
     address_line_2: str | None
     city: str
-    state: str
-    zip_code: str
+    state: str | None
+    zip_code: str | None
     insurance_provider: str | None
     insurance_member_id: str | None
     preferred_language: str

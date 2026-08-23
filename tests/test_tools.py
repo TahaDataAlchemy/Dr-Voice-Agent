@@ -59,7 +59,15 @@ def test_capture_detects_existing_patient(client, tools, patient_payload):
 def test_register_requires_all_required_fields(tools):
     _, t = tools
     out = run(t["register_patient"], first_name="Jane")
-    assert out["ok"] is False and "zip_code" in out["errors"] and "last_name" in out["errors"]
+    assert out["ok"] is False and "last_name" in out["errors"] and "phone_number" in out["errors"] and "city" in out["errors"]
+    # optional fields are not required
+    assert "zip_code" not in out["errors"] and "date_of_birth" not in out["errors"]
+
+
+def test_register_minimal(client, tools):
+    _, t = tools
+    out = run(t["register_patient"], first_name="Ada", last_name="Lovelace", phone_number="415 555 0142", city="Austin")
+    assert out["ok"] is True and out["first_name"] == "Ada"
 
 
 def test_register_then_update_and_schedule(client, tools):

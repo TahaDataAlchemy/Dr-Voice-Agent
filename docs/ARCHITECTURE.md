@@ -150,7 +150,8 @@ Envelope on every response: `{"data": …, "error": null}` or `{"data": null, "e
 
 ## Data model (Supabase Postgres)
 
-- **patients** — the standard U.S. demographic dataset with DB-level constraints (NOT NULL on required
+- **patients** — the demographic dataset. Required (NOT NULL): first name, last name, phone, city. Everything else
+  (DOB, sex, address, state, ZIP, email, insurance, emergency contact, language) is optional. DB-level constraints (NOT NULL on the required
   fields; CHECK for the `sex` enum, 10-digit phone, ZIP/ZIP+4, 2-letter state, DOB not in the future),
   UTC `created_at`/`updated_at`, and `deleted_at` for soft delete. Indexed on `last_name`, `date_of_birth`,
   `phone_number`.

@@ -35,9 +35,19 @@ def test_missing_required_and_unknown_fields(client):
     resp = client.post("/patients", json={"first_name": "Only"})
     assert resp.status_code == 422
     fields = {d["field"] for d in resp.json()["error"]["details"]}
-    assert {"last_name", "date_of_birth", "sex", "phone_number", "address_line_1", "city", "state", "zip_code"} <= fields
+    assert {"last_name", "phone_number", "city"} <= fields
+    # DOB / sex / address / state / zip are optional now, so they must NOT be flagged as missing
+    assert {"date_of_birth", "sex", "address_line_1", "state", "zip_code"}.isdisjoint(fields)
     resp = client.post("/patients", json={"nope": 1})
     assert resp.status_code == 422
+
+
+def test_minimal_registration_only_name_phone_city(client):
+    resp = client.post("/patients", json={"first_name": "Ada", "last_name": "Lovelace", "phone_number": "415 555 0142", "city": "Austin"})
+    assert resp.status_code == 201, resp.text
+    data = resp.json()["data"]
+    assert data["phone_number"] == "4155550142" and data["city"] == "Austin"
+    assert data["date_of_birth"] is None and data["sex"] is None and data["state"] is None and data["zip_code"] is None
 
 
 def test_malformed_json_is_400(client):
